@@ -1,0 +1,27 @@
+{
+  "Title": "Top Down Testing",
+  "Type": "game",
+  "Org": "local",
+  "Ident": "top_down_testing",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": [],
+  "HasCode": true,
+  "CodePath": "/code/",
+  "RootNamespace": null,
+  "Metadata": {
+    "MaxPlayers": 64,
+    "MinPlayers": 1,
+    "GameNetworkType": "Multiplayer",
+    "MapSelect": "Official",
+    "MapList": [
+      "aero.roblox_baseplate"
+    ],
+    "RankType": "None",
+    "PerMapRanking": false,
+    "LeaderboardType": "None",
+    "ProjectTemplate": null,
+    "GameCategory": "None"
+  }
+}
