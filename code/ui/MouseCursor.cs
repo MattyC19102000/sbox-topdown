@@ -27,7 +27,6 @@ public class MouseCursor : Panel
 
         Cursor.Style.Left = Length.Fraction( normalX );
         Cursor.Style.Top = Length.Fraction( normalY );
-        Cursor.Style.Dirty();
 
         base.Tick();
     }
