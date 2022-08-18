@@ -24,8 +24,8 @@
 	</ItemGroup>
 
   <PropertyGroup>
-	<OutputPath>../.vs/output/</OutputPath>
-	<DocumentationFile>../.vs/output/top_down_testing.xml</DocumentationFile>
+	<OutputPath>D:\Program Files\Steam\steamapps\common\sbox/.vs/output/</OutputPath>
+	<DocumentationFile>D:\Program Files\Steam\steamapps\common\sbox/.vs/output/top_down_testing.xml</DocumentationFile>
 	<RootNamespace>Sandbox</RootNamespace>
 	<Nullable>disable</Nullable>
   </PropertyGroup>
