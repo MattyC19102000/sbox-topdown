@@ -19,6 +19,7 @@ namespace Sandbox{
 		[Net] public float Gravity { get; set; } = 800.0f;
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
+		[Net] public float Acceleration { get; set; } = 50.0f;
 
 		public TopDownController()
 		{
@@ -85,6 +86,11 @@ namespace Sandbox{
 				Position = premove.EndPosition;
 				return;
 			}
+		}
+
+		public virtual void ApplyAccelerate()
+		{
+			
 		}
 
 		// Allow the pawn to be affected by gravity
