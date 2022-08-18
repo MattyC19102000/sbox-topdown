@@ -12,20 +12,24 @@ namespace Sandbox{
 	public partial class TopDownController : BasePlayerController
 	{
 
+		// Networked pawn variables
 		[Net] public float Speed { get; set; } = 250.0f;
 		[Net] public float WalkSpeed { get; set; } = 150.0f;
 		[Net] public float RunSpeed { get; set; } = 400.0f;
 		[Net] public float Gravity { get; set; } = 800.0f;
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
+
 		public TopDownController()
 		{
 			
 		}
 
+		// Client Bounding Box information
 		protected Vector3 mins;
         protected Vector3 maxs;
 
+		// Set the information of the pawns bounding box
 		public virtual void SetBBox(Vector3 mins, Vector3 maxs)
         {
             if (this.mins == mins && this.maxs == maxs)
@@ -35,6 +39,7 @@ namespace Sandbox{
             this.maxs = maxs;
         }
 
+		// Change the pawns bounding box
         public virtual void UpdateBBox()
         {
             var girth = BodyGirth * 0.5f;
@@ -54,24 +59,38 @@ namespace Sandbox{
 			return Speed;
 		}
 
+		// Get the entity information of whatever is below the pawn
 		public virtual void GetGroundEntity(TraceResult tr)
 		{
 			GroundEntity = tr.Entity;
 		}
 
+		// Movement function for when the pawn is on the ground
 		public virtual void Move()
 		{
-			Velocity = new Vector3(Input.Forward, Input.Left, 0);
+			// Get input from the user
+			Velocity = new Vector3(Input.Forward, Input.Left, 0); 
+			// Change the speed of the pawn depending on their chosen movement speed
 			Velocity *= GetSpeed();
+			// Ensure pawn stays on floor
 			Velocity = Velocity.WithZ(0);
 			
+			// Get where the pawn will be after velocity change
 			var dest = (Position + Velocity * Time.Delta).WithZ(Position.z);
+			// trace the bounding to this destination
 			var premove = TraceBBox(Position, dest);
+			// if the box doesn't collide allow the pawn to move
 			if(premove.Fraction == 1)
 			{
 				Position = premove.EndPosition;
 				return;
 			}
+		}
+
+		// Allow the pawn to be affected by gravity
+		public virtual void Fall()
+		{
+			Position += Velocity * Time.Delta;
 		}
 
 		public override void Simulate()
@@ -94,7 +113,8 @@ namespace Sandbox{
 			}
 			else
 			{
-				Position += Velocity * Time.Delta;
+				// if the pawn is in the air they will fall
+				Fall();
 			}
 		}
 
