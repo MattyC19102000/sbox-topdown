@@ -13,7 +13,7 @@ namespace Sandbox
         private Angles followAngles;
 
 		[Net]
-		 protected float CameraHeight { get; set; } = 300.0f;
+		 protected float CameraHeight { get; set; } = 350.0f;
 
 		[Net, Predicted]
 		 public Vector3 MouseWorldPos { get; set; }
@@ -33,7 +33,7 @@ namespace Sandbox
 			Rotation = Rotation.From(followAngles);
 			Position = pawn.Position + (Vector3.Up * CameraHeight);
 
-			FieldOfView = 80;
+			FieldOfView = 90;
 		}
 
 		public virtual void FollowPawn(Entity pawn)

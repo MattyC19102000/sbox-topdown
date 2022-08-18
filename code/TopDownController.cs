@@ -15,7 +15,7 @@ namespace Sandbox{
 		[Net] public float Speed { get; set; } = 250.0f;
 		[Net] public float WalkSpeed { get; set; } = 150.0f;
 		[Net] public float RunSpeed { get; set; } = 400.0f;
-		[Net] public float Gravity { get; set; } = 400.0f;
+		[Net] public float Gravity { get; set; } = 800.0f;
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
 		public TopDownController()
@@ -54,16 +54,48 @@ namespace Sandbox{
 			return Speed;
 		}
 
-		public virtual void GetGroundEntity()
+		public virtual void GetGroundEntity(TraceResult tr)
 		{
+			GroundEntity = tr.Entity;
+		}
 
+		public virtual void Move()
+		{
+			Velocity = new Vector3(Input.Forward, Input.Left, 0);
+			Velocity *= GetSpeed();
+			Velocity = Velocity.WithZ(0);
+			
+			var dest = (Position + Velocity * Time.Delta).WithZ(Position.z);
+			var premove = TraceBBox(Position, dest);
+			if(premove.Fraction == 1)
+			{
+				Position = premove.EndPosition;
+				return;
+			}
 		}
 
 		public override void Simulate()
 		{
-			
+			// Apply Gravity
+			Velocity -= new Vector3(0, 0, Gravity) * Time.Delta;
+
+			// Scale the bounding box for the pawn
 			UpdateBBox();
 
+			// Check for floor against bounding box
+			GetGroundEntity(TraceBBox(Position, Position + Vector3.Down * 2));
+
+			bool onGround = GroundEntity != null;
+			// Stop pawn from phasing through the floor with gravity
+			if(onGround)
+			{
+				// Finalize Movement
+				Move();
+			}
+			else
+			{
+				Position += Velocity * Time.Delta;
+			}
 		}
 
 		public override void FrameSimulate()
