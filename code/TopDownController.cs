@@ -16,11 +16,34 @@ namespace Sandbox{
 		[Net] public float WalkSpeed { get; set; } = 150.0f;
 		[Net] public float RunSpeed { get; set; } = 400.0f;
 		[Net] public float Gravity { get; set; } = 400.0f;
-
+		[Net] public float BodyGirth { get; set; } = 32.0f;
+        [Net] public float BodyHeight { get; set; } = 72.0f;
 		public TopDownController()
 		{
 			
 		}
+
+		protected Vector3 mins;
+        protected Vector3 maxs;
+
+		public virtual void SetBBox(Vector3 mins, Vector3 maxs)
+        {
+            if (this.mins == mins && this.maxs == maxs)
+                return;
+
+            this.mins = mins;
+            this.maxs = maxs;
+        }
+
+        public virtual void UpdateBBox()
+        {
+            var girth = BodyGirth * 0.5f;
+
+            var mins = new Vector3(-girth, -girth, 0) * Pawn.Scale;
+            var maxs = new Vector3(+girth, +girth, BodyHeight) * Pawn.Scale;
+
+            SetBBox(mins, maxs);
+        }
 
 		// Return speed based on which buttons are pressed
 		public virtual float GetSpeed()
@@ -31,29 +54,16 @@ namespace Sandbox{
 			return Speed;
 		}
 
-		// Make the character move
-		public virtual void TopDownWalk()
+		public virtual void GetGroundEntity()
 		{
-			// Get current inputs to create direction vector
-			Vector3 direction = new Vector3(Input.Forward, Input.Left, 0);
-			// normalize the direction vector and multiply by walkspeed to get world space direction
-			direction = direction.Normal * Speed;
-			// apply the movement
-			Position += direction * Time.Delta;
+
 		}
 
 		public override void Simulate()
 		{
-			// apply gravity
-			Velocity -= new Vector3(0, 0, Gravity) * Time.Delta;
+			
+			UpdateBBox();
 
-			TopDownWalk();
-
-			// if standing on the ground
-			if(GroundEntity != null) 
-			{
-				Velocity = Velocity.WithZ(0);
-			}
 		}
 
 		public override void FrameSimulate()
