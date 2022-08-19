@@ -21,7 +21,9 @@ namespace Sandbox{
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
 		[Net] public float Acceleration { get; set; } = 10.0f;
-		[Net] public float Friction { get; set; } = 250.0f;
+		[Net] public float Friction { get; set; } = 400.0f;
+		[Net, Predicted] public Vector3 MouseWorldPos { get; set; }
+
 
 		public Unstuck Unstuck;
 
@@ -109,6 +111,20 @@ namespace Sandbox{
 			}
 		}
 
+		public virtual void LookAtCursor()
+		{
+			var tr = Trace.Ray( Input.Cursor.Origin, Input.Cursor.Origin + Input.Cursor.Direction * 100000)
+            .WithoutTags( "player" )
+            .WithAnyTags("solid")
+            .Run();
+
+			if(tr.Hit)
+			{
+				MouseWorldPos = tr.HitPosition;
+				Rotation = Rotation.LookAt((MouseWorldPos - Position).WithZ(0), Vector3.Up);
+			}
+		}
+
 		public virtual void ApplyAccelerate()
 		{
 			// gather unit vector for direction
@@ -159,6 +175,9 @@ namespace Sandbox{
 			// Scale the bounding box for the pawn
 			UpdateBBox();
 
+			// Make Pawn look at Cursor
+			LookAtCursor();
+
 			// Use Unstuck class to test if pawn is Stuck
 			if (Unstuck.TestAndFix())
                 return;
@@ -177,7 +196,7 @@ namespace Sandbox{
 			{
 				// if the pawn is in the air they will fall
 				Fall();
-			}
+			} 
 
 			if(Input.Pressed(InputButton.PrimaryAttack))
 			{
@@ -190,6 +209,5 @@ namespace Sandbox{
 		{
 			base.FrameSimulate();
 		}
-
 	}
 }

@@ -9,7 +9,7 @@ namespace Sandbox
 	*/
 	public partial class TopDownCamera : CameraMode
 	{
-		protected float CameraHeight { get; set; } = 350.0f;
+		public float CameraHeight = 350.0f;
 
 		// Called when the camera is first activated
 		public override void Activated()

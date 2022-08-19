@@ -10,7 +10,7 @@ namespace Sandbox
 
         public override void Fire()
         {
-
+           Log.Info( $"Pawn Rotation {pawnController.Rotation}.");
         }
     }
 }
