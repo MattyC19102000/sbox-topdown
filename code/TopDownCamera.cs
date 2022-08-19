@@ -9,11 +9,7 @@ namespace Sandbox
 	*/
 	public partial class TopDownCamera : CameraMode
 	{
-		[Net]
-		 protected float CameraHeight { get; set; } = 350.0f;
-
-		[Net, Predicted]
-		 public Vector3 MouseWorldPos { get; set; }
+		protected float CameraHeight { get; set; } = 350.0f;
 
 		// Called when the camera is first activated
 		public override void Activated()
@@ -36,40 +32,6 @@ namespace Sandbox
             Position = pawn.Position + (Vector3.Up * CameraHeight);
 		}
 
-		public virtual void GetMouseWorldSpace()
-		{
-			// old input.cursor code
-			/*var tr = Trace.Ray( Input.Cursor.Origin, Input.Cursor.Origin + Input.Cursor.Direction * 100000)
-			.WithoutTags( "player" )
-			.WithAnyTags("solid")
-			.Run();*/
-			
-
-			var direction = Screen.GetDirection(new Vector2(Mouse.Position.x, Mouse.Position.y), FieldOfView, Rotation, Screen.Size);
-			var tr = Trace.Ray(Position, Position + direction * 1000)
-			.UseHitboxes()
-			.WithoutTags("player")
-			.WithAnyTags("solid")
-			.Run();
-
-			if(tr.Hit)
-			{
-				DebugOverlay.TraceResult( tr );
-				MouseWorldPos = tr.HitPosition;
-			}
-			else
-			{
-				Log.Info("Mouse Failed to Hit World Space");
-			}
-		}
-
-		public virtual void SetPawnRotation()
-		{
-			var pawn = Local.Pawn;
-			if( pawn == null) return;
-			pawn.Rotation = Rotation.LookAt((MouseWorldPos - pawn.Position).WithZ(0), Vector3.Up);
-		}
-
 		// called in Simulate()
 		public override void Update()
 		{
@@ -78,8 +40,6 @@ namespace Sandbox
 			if ( pawn == null ) return;
 
 			FollowPawn(pawn);
-			GetMouseWorldSpace();
-			SetPawnRotation();
 		}
 	}
 }

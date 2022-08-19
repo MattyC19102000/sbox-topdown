@@ -25,9 +25,12 @@ namespace Sandbox{
 
 		public Unstuck Unstuck;
 
+		public WeaponBase Weapon;
+
 		public TopDownController()
 		{
 			Unstuck = new Unstuck(this);
+			Weapon = new DebugWeapon(this);
 		}
 
 
@@ -175,6 +178,12 @@ namespace Sandbox{
 				// if the pawn is in the air they will fall
 				Fall();
 			}
+
+			if(Input.Pressed(InputButton.PrimaryAttack))
+			{
+				Weapon.Fire();
+			}
+
 		}
 
 		public override void FrameSimulate()
