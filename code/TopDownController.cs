@@ -71,96 +71,16 @@ namespace Sandbox{
 		// Movement function for when the pawn is on the ground
 		public virtual void Move()
 		{
-			// Get input from the user
-			WishVelocity = new Vector3(Input.Forward, Input.Left, 0); 
-
-			// Clamp Magnitude to prevent Strafe Walking
-			var inSpeed = WishVelocity.Length.Clamp(0, 1);
-			WishVelocity = WishVelocity.Normal * inSpeed;
-			// Multiply by Desired Speed
-			WishVelocity *= GetSpeed();
-
-			// Get the Direction and Speed of the WishVelocity as seperate variables
-			var wishDir = WishVelocity.Normal;
-			var wishSpeed = WishVelocity.Length;
-
-            WishVelocity = WishVelocity.Normal * wishSpeed;
-
-			// Keep the velocity Z at 0 and apply Acceleration
-			Velocity = Velocity.WithZ(0);
-			ApplyAccelerate(wishDir, wishSpeed);
-			Velocity = Velocity.WithZ(0);
-			
-			// Get where the pawn will be after velocity change
-			var dest = (Position + Velocity * Time.Delta).WithZ(Position.z);
-			// trace the bounding to this destination
-			var premove = TraceBBox(Position, dest);
-			// if the box doesn't collide allow the pawn to move
-			if(premove.Fraction == 1)
-			{
-				Position = premove.EndPosition;
-				return;
-			}
-
-			// ensure velocity never goes above the desired speed
-			Velocity = Velocity.Normal * MathF.Min( Velocity.Length, GetSpeed() );
 
 		}
 
 		public virtual void ApplyAccelerate(Vector3 wishDir, float wishSpeed)
 		{
-			// get the speed of the current wish direction vector
-			var currentSpeed = Velocity.Dot(wishDir);
 
-			// get the speed which is to be added to the velocity
-			var addSpeed = wishSpeed - currentSpeed;
-
-			// if the speed to be added is less than 0 then return
-			if(addSpeed <= 0)
-			{
-				return;
-			}
-
-			// calculate the acceleration from the wishspeed
-			var accelSpeed = Acceleration * wishSpeed * Time.Delta;
-
-			// clamp the accelspeed to the addspeed
-			if(accelSpeed > addSpeed)
-			{
-				accelSpeed = addSpeed;
-			}
-			
-			// apply velocity change
-			Velocity += accelSpeed * wishDir;
 		}
 
 		public virtual void ApplyFriction()
 		{
-			// set the harshness of the friction
-			float frictionAmount = 1.0f;
-
-			// get current speed of pawn
-			var speed = Velocity.Length;
-
-			// if not moving don't apply friction
-			if(speed < 0.1f) return;
-
-			// get the bleed amount between speed and slow speed
-			float bleed = (speed < SlowSpeed) ? SlowSpeed : speed;
-
-			// calculate speed drop
-			var drop = bleed * Time.Delta * frictionAmount;
-
-			// apply speed drop
-			float newspeed = speed - drop;
-			if (newspeed < 0) newspeed = 0;
-
-			if (newspeed != speed)
-            {
-                newspeed /= speed;
-                Velocity *= newspeed;
-            }
-
 
 		}
 
@@ -185,10 +105,7 @@ namespace Sandbox{
 			// Stop pawn from phasing through the floor with gravity
 			if(onGround)
 			{
-				// Apply ground friction
-				ApplyFriction();
-				// Finalize Movement
-				Move();
+
 			}
 			else
 			{

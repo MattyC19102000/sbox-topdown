@@ -9,9 +9,6 @@ namespace Sandbox
 	*/
 	public partial class TopDownCamera : CameraMode
 	{
-		// Set of Euler Angles used to clamp and set axis' 
-        private Angles followAngles;
-
 		[Net]
 		 protected float CameraHeight { get; set; } = 350.0f;
 
@@ -25,15 +22,12 @@ namespace Sandbox
 			var pawn = Local.Pawn;
 			if ( pawn == null ) return;
 
-			// set the camera to looks straight down
-			followAngles.pitch = 90;
-			// yaw is 0 to keep the top of the camera facing the north of the map
-			followAngles.yaw = 0;
-			// Set the rotation to these new angles
-			Rotation = Rotation.From(followAngles);
-			Position = pawn.Position + (Vector3.Up * CameraHeight);
-
+			// set FOV
 			FieldOfView = 90;
+
+			// Look straight down
+			Rotation = Rotation.From(90, 0, 0);
+
 		}
 
 		public virtual void FollowPawn(Entity pawn)
@@ -73,10 +67,10 @@ namespace Sandbox
 		{
 			var pawn = Local.Pawn;
 			if( pawn == null) return;
-			pawn.Rotation = Rotation.LookAt((MouseWorldPos - pawn.Position).WithZ(0) , Vector3.Up);
+			pawn.Rotation = Rotation.LookAt((MouseWorldPos - pawn.Position).WithZ(0), Vector3.Up);
 		}
 
-		// called per tick clientside (i think)
+		// called in Simulate()
 		public override void Update()
 		{
 			// grab pawn again
