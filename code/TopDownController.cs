@@ -6,23 +6,22 @@ namespace Sandbox{
 		Controller which moves the pawn within pseudo 2d top down space
 
 		ToDo:
-		Make pawn rotate in world space
-		Make pawn look at mouse cursor
-		Add collisions
+		Fix weird velocity slingshotting
+		add primitive shooting
 
 	*/
 	public partial class TopDownController : BasePlayerController
 	{
 
 		// Networked pawn variables
-		[Net] public float Speed { get; set; } = 250.0f;
+		[Net] public float Speed { get; set; } = 200.0f;
 		[Net] public float WalkSpeed { get; set; } = 150.0f;
-		[Net] public float RunSpeed { get; set; } = 400.0f;
+		[Net] public float RunSpeed { get; set; } = 300.0f;
 		[Net] public float Gravity { get; set; } = 800.0f;
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
-		[Net] public float Acceleration { get; set; } = 25.0f;
-		[Net] public float MinSpeed { get; set; } = 100.0f;
+		[Net] public float Acceleration { get; set; } = 10.0f;
+		[Net] public float SlowSpeed { get; set; } = 200.0f;
 
 		public TopDownController()
 		{
@@ -74,20 +73,22 @@ namespace Sandbox{
 		{
 			// Get input from the user
 			WishVelocity = new Vector3(Input.Forward, Input.Left, 0); 
+
+			// Clamp Magnitude to prevent Strafe Walking
 			var inSpeed = WishVelocity.Length.Clamp(0, 1);
 			WishVelocity = WishVelocity.Normal * inSpeed;
+			// Multiply by Desired Speed
 			WishVelocity *= GetSpeed();
 
+			// Get the Direction and Speed of the WishVelocity as seperate variables
 			var wishDir = WishVelocity.Normal;
 			var wishSpeed = WishVelocity.Length;
 
-			WishVelocity = WishVelocity.WithZ(0);
             WishVelocity = WishVelocity.Normal * wishSpeed;
 
+			// Keep the velocity Z at 0 and apply Acceleration
 			Velocity = Velocity.WithZ(0);
-			// Apply a velocity change to the pawn
 			ApplyAccelerate(wishDir, wishSpeed);
-			// Ensure pawn stays on floor
 			Velocity = Velocity.WithZ(0);
 			
 			// Get where the pawn will be after velocity change
@@ -101,44 +102,56 @@ namespace Sandbox{
 				return;
 			}
 
+			// ensure velocity never goes above the desired speed
 			Velocity = Velocity.Normal * MathF.Min( Velocity.Length, GetSpeed() );
 
 		}
 
 		public virtual void ApplyAccelerate(Vector3 wishDir, float wishSpeed)
 		{
-
+			// get the speed of the current wish direction vector
 			var currentSpeed = Velocity.Dot(wishDir);
 
+			// get the speed which is to be added to the velocity
 			var addSpeed = wishSpeed - currentSpeed;
 
+			// if the speed to be added is less than 0 then return
 			if(addSpeed <= 0)
 			{
 				return;
 			}
 
+			// calculate the acceleration from the wishspeed
 			var accelSpeed = Acceleration * wishSpeed * Time.Delta;
 
+			// clamp the accelspeed to the addspeed
 			if(accelSpeed > addSpeed)
 			{
 				accelSpeed = addSpeed;
 			}
-
+			
+			// apply velocity change
 			Velocity += accelSpeed * wishDir;
 		}
 
 		public virtual void ApplyFriction()
 		{
-			float frictionAmount = 5.0f;
+			// set the harshness of the friction
+			float frictionAmount = 1.0f;
 
+			// get current speed of pawn
 			var speed = Velocity.Length;
 
+			// if not moving don't apply friction
 			if(speed < 0.1f) return;
 
-			float bleed = (speed < MinSpeed) ? MinSpeed : speed;
+			// get the bleed amount between speed and slow speed
+			float bleed = (speed < SlowSpeed) ? SlowSpeed : speed;
 
+			// calculate speed drop
 			var drop = bleed * Time.Delta * frictionAmount;
 
+			// apply speed drop
 			float newspeed = speed - drop;
 			if (newspeed < 0) newspeed = 0;
 
