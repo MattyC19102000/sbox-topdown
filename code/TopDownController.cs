@@ -1,3 +1,5 @@
+using System;
+
 namespace Sandbox{
 
 	/*
@@ -19,7 +21,8 @@ namespace Sandbox{
 		[Net] public float Gravity { get; set; } = 800.0f;
 		[Net] public float BodyGirth { get; set; } = 32.0f;
         [Net] public float BodyHeight { get; set; } = 72.0f;
-		[Net] public float Acceleration { get; set; } = 50.0f;
+		[Net] public float Acceleration { get; set; } = 25.0f;
+		[Net] public float MinSpeed { get; set; } = 100.0f;
 
 		public TopDownController()
 		{
@@ -70,9 +73,20 @@ namespace Sandbox{
 		public virtual void Move()
 		{
 			// Get input from the user
-			Velocity = new Vector3(Input.Forward, Input.Left, 0); 
-			// Change the speed of the pawn depending on their chosen movement speed
-			Velocity *= GetSpeed();
+			WishVelocity = new Vector3(Input.Forward, Input.Left, 0); 
+			var inSpeed = WishVelocity.Length.Clamp(0, 1);
+			WishVelocity = WishVelocity.Normal * inSpeed;
+			WishVelocity *= GetSpeed();
+
+			var wishDir = WishVelocity.Normal;
+			var wishSpeed = WishVelocity.Length;
+
+			WishVelocity = WishVelocity.WithZ(0);
+            WishVelocity = WishVelocity.Normal * wishSpeed;
+
+			Velocity = Velocity.WithZ(0);
+			// Apply a velocity change to the pawn
+			ApplyAccelerate(wishDir, wishSpeed);
 			// Ensure pawn stays on floor
 			Velocity = Velocity.WithZ(0);
 			
@@ -86,11 +100,55 @@ namespace Sandbox{
 				Position = premove.EndPosition;
 				return;
 			}
+
+			Velocity = Velocity.Normal * MathF.Min( Velocity.Length, GetSpeed() );
+
 		}
 
-		public virtual void ApplyAccelerate()
+		public virtual void ApplyAccelerate(Vector3 wishDir, float wishSpeed)
 		{
-			
+
+			var currentSpeed = Velocity.Dot(wishDir);
+
+			var addSpeed = wishSpeed - currentSpeed;
+
+			if(addSpeed <= 0)
+			{
+				return;
+			}
+
+			var accelSpeed = Acceleration * wishSpeed * Time.Delta;
+
+			if(accelSpeed > addSpeed)
+			{
+				accelSpeed = addSpeed;
+			}
+
+			Velocity += accelSpeed * wishDir;
+		}
+
+		public virtual void ApplyFriction()
+		{
+			float frictionAmount = 5.0f;
+
+			var speed = Velocity.Length;
+
+			if(speed < 0.1f) return;
+
+			float bleed = (speed < MinSpeed) ? MinSpeed : speed;
+
+			var drop = bleed * Time.Delta * frictionAmount;
+
+			float newspeed = speed - drop;
+			if (newspeed < 0) newspeed = 0;
+
+			if (newspeed != speed)
+            {
+                newspeed /= speed;
+                Velocity *= newspeed;
+            }
+
+
 		}
 
 		// Allow the pawn to be affected by gravity
@@ -114,6 +172,8 @@ namespace Sandbox{
 			// Stop pawn from phasing through the floor with gravity
 			if(onGround)
 			{
+				// Apply ground friction
+				ApplyFriction();
 				// Finalize Movement
 				Move();
 			}
