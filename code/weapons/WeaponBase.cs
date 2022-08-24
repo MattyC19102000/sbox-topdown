@@ -12,7 +12,7 @@ namespace Sandbox
 
         public virtual void Fire()
         {
-            return;
+            
         }
     }
 }

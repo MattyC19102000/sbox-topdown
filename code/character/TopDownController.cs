@@ -106,7 +106,7 @@ namespace Sandbox{
 			// if the trace hits no solid objects
 			if(pm.Fraction == 1)
 			{
-				// allow the pawn to move to the desired position
+				// allow the pawn to move to the desired position a
 				Position = pm.EndPosition;
 			}
 		}
@@ -118,8 +118,11 @@ namespace Sandbox{
             .WithAnyTags("solid")
             .Run();
 
+
+
 			if(tr.Hit)
 			{
+				DebugOverlay.TraceResult(tr);
 				MouseWorldPos = tr.HitPosition;
 				Rotation = Rotation.LookAt((MouseWorldPos - Position).WithZ(0), Vector3.Up);
 			}

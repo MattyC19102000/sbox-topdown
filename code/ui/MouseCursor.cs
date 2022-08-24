@@ -10,7 +10,7 @@ public class MouseCursor : Panel
 
     public MouseCursor() : base()
     {
-        StyleSheet.Load("/ui/MouseCursor.scss");
+        StyleSheet.Load("ui/MouseCursor.scss");
 
         Cursor = Add.Image( "", "cursor");
         Cursor.SetTexture("ui/crosshair/crosshair.png");
